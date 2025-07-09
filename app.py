@@ -99,6 +99,14 @@ def receber_comissao(servico_id):
 
     return redirect(url_for('comissoes'))
 
+@app.route('/comissao/resetar/<int:servico_id>', methods=['POST'])
+def resetar_comissao(servico_id):
+    servico = Servico.query.get_or_404(servico_id)
+    servico.comissao_recebida = 0.0
+    db.session.commit()
+    flash('O registro de comissão recebida para este serviço foi zerado.', 'success')
+    return redirect(url_for('comissoes'))
+
 @app.route('/servicos', methods=['GET', 'POST'])
 def servicos():
     if request.method == 'POST':
@@ -146,6 +154,20 @@ def editar_servico(servico_id):
         return redirect(url_for('servicos'))
 
     return render_template('editar_servico.html', servico=servico, clientes=todos_clientes)
+
+@app.route('/servico/deletar/<int:servico_id>', methods=['POST'])
+def deletar_servico(servico_id):
+    servico = Servico.query.get_or_404(servico_id)
+
+    # Regra de segurança: não deletar se já houve movimentação financeira
+    if servico.valor_pago > 0 or servico.comissao_recebida > 0:
+        flash('Este serviço não pode ser deletado pois já possui pagamentos ou comissões registradas.', 'danger')
+        return redirect(url_for('servicos'))
+
+    db.session.delete(servico)
+    db.session.commit()
+    flash('Serviço deletado com sucesso!', 'success')
+    return redirect(url_for('servicos'))
 
 @app.route('/clientes', methods=['GET', 'POST'])
 def clientes():
