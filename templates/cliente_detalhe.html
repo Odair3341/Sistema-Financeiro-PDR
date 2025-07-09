@@ -1,0 +1,75 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Detalhes do Cliente: {{ cliente.nome }}</h1>
+
+  <!-- Formulário para Registrar Pagamento -->
+  <div class="card mb-4">
+    <div class="card-header">
+      Registrar Novo Pagamento
+    </div>
+    <div class="card-body">
+      <form action="{{ url_for('registrar_pagamento', cliente_id=cliente.id) }}" method="POST">
+        <div class="row">
+          <div class="col-md-4">
+            <label for="valor" class="form-label">Valor do Pagamento (R$)</label>
+            <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-success">Registrar Pagamento</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de Serviços do Cliente -->
+  <div class="card">
+    <div class="card-header">
+      Histórico de Serviços
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Veículo</th>
+            <th>Valor Bruto</th>
+            <th>Valor Pago</th>
+            <th>Saldo Devedor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for servico in servicos %}
+            <tr>
+              <td>{{ servico.data_servico.strftime('%d/%m/%Y') }}</td>
+              <td>{{ servico.veiculo }}</td>
+              <td>R$ {{ "%.2f"|format(servico.valor_bruto) }}</td>
+              <td>R$ {{ "%.2f"|format(servico.valor_pago) }}</td>
+              <td>R$ {{ "%.2f"|format(servico.valor_bruto - servico.valor_pago) }}</td>
+              <td>
+                {% if servico.quitado %}
+                  <span class="badge bg-success">Liquidado</span>
+                {% elif servico.valor_pago > 0 %}
+                  <span class="badge bg-info">Parcialmente Pago</span>
+                {% else %}
+                  <span class="badge bg-warning">Em Aberto</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center">Nenhum serviço para este cliente.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="{{ url_for('clientes') }}" class="btn btn-secondary">Voltar para a Lista de Clientes</a>
+  </div>
+{% endblock %}

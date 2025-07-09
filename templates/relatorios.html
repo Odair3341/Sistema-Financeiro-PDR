@@ -1,0 +1,30 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Central de Relatórios</h1>
+
+  <div class="card">
+    <div class="card-header">
+      Gerar Relatório de Comissões
+    </div>
+    <div class="card-body">
+      <form action="{{ url_for('relatorio_comissoes') }}" method="GET">
+        <button type="submit" class="btn btn-primary">Gerar Extrato de Comissões</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+      Backup e Restauração
+    </div>
+    <div class="card-body">
+      <a href="{{ url_for('export_data') }}" class="btn btn-info">Exportar Dados (Backup JSON)</a>
+      <!-- Formulário de importação será adicionado aqui -->
+    </div>
+  </div>
+
+{% endblock %}
+

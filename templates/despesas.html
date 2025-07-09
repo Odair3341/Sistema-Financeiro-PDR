@@ -1,0 +1,77 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Gerenciar Despesas</h1>
+
+  <!-- Formulário de Cadastro de Despesa -->
+  <div class="card mb-4">
+    <div class="card-header">
+      Adicionar Nova Despesa
+    </div>
+    <div class="card-body">
+      <form action="{{ url_for('despesas') }}" method="POST">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <input type="text" class="form-control" id="descricao" name="descricao" required>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="valor" class="form-label">Valor (R$)</label>
+            <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="data_vencimento" class="form-label">Data de Vencimento</label>
+            <input type="date" class="form-control" id="data_vencimento" name="data_vencimento" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar Despesa</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de Despesas -->
+  <div class="card">
+    <div class="card-header">
+      Despesas Cadastradas
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Vencimento</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for despesa in despesas %}
+            <tr>
+              <td>{{ despesa.descricao }}</td>
+              <td>{{ despesa.data_vencimento.strftime('%d/%m/%Y') }}</td>
+              <td>R$ {{ "%.2f"|format(despesa.valor) }}</td>
+              <td>
+                {% if despesa.pago %}
+                  <span class="badge bg-success">Pago</span>
+                {% else %}
+                  <span class="badge bg-danger">Pendente</span>
+                {% endif %}
+              </td>
+              <td>
+                <!-- Botão para marcar como pago será implementado aqui -->
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="5" class="text-center">Nenhuma despesa cadastrada ainda.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+

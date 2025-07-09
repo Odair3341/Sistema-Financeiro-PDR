@@ -1,0 +1,43 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Gerenciar Clientes</h1>
+
+  <!-- Formulário de Cadastro -->
+  <div class="card mb-4">
+    <div class="card-header">
+      Adicionar Novo Cliente
+    </div>
+    <div class="card-body">
+      <form action="{{ url_for('clientes') }}" method="POST">
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome do Cliente</label>
+          <input type="text" class="form-control" id="nome" name="nome" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar Cliente</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de Clientes -->
+  <div class="card">
+    <div class="card-header">
+      Clientes Cadastrados
+    </div>
+    <div class="card-body">
+      <ul class="list-group">
+        {% if clientes %}
+          {% for cliente in clientes %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <a href="{{ url_for('cliente_detalhe', cliente_id=cliente.id) }}" class="text-decoration-none">{{ cliente.nome }}</a>
+              <!-- Botões de ação (editar, excluir) podem ser adicionados aqui no futuro -->
+            </li>
+          {% endfor %}
+        {% else %}
+          <li class="list-group-item">Nenhum cliente cadastrado ainda.</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}
