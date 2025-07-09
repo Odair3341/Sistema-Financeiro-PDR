@@ -217,6 +217,10 @@ def comissoes():
 def relatorios():
     return render_template('relatorios.html')
 
+@app.route('/backup')
+def backup():
+    return render_template('backup.html')
+
 @app.route('/relatorio/comissoes', methods=['GET', 'POST'])
 def relatorio_comissoes():
     # Filtra serviços que geram comissão
@@ -332,4 +336,85 @@ def export_data():
     buffer.seek(0)
 
     return send_file(buffer, as_attachment=True, download_name='financeiro_backup.json', mimetype='application/json')
+
+@app.route('/backup/import', methods=['POST'])
+def import_data():
+    if 'backup_file' not in request.files:
+        flash('Nenhum arquivo selecionado.', 'danger')
+        return redirect(url_for('backup'))
+
+    file = request.files['backup_file']
+
+    if file.filename == '':
+        flash('Nenhum arquivo selecionado.', 'danger')
+        return redirect(url_for('backup'))
+
+    if file and file.filename.endswith('.json'):
+        try:
+            json_data = json.load(file)
+
+            # Apagar dados existentes (ordem inversa de dependência)
+            db.session.query(Pagamento).delete()
+            db.session.query(Servico).delete()
+            db.session.query(Despesa).delete()
+            db.session.query(Cliente).delete()
+            db.session.commit()
+
+            # Importar clientes
+            for item in json_data.get('clientes', []):
+                cliente = Cliente(id=item['id'], nome=item['nome'])
+                db.session.add(cliente)
+            db.session.commit()
+
+            # Importar despesas
+            for item in json_data.get('despesas', []):
+                despesa = Despesa(
+                    id=item['id'],
+                    descricao=item['descricao'],
+                    valor=item['valor'],
+                    data_vencimento=datetime.fromisoformat(item['data_vencimento']),
+                    pago=item['pago']
+                )
+                db.session.add(despesa)
+            db.session.commit()
+
+            # Importar serviços
+            for item in json_data.get('servicos', []):
+                servico = Servico(
+                    id=item['id'],
+                    data_servico=datetime.fromisoformat(item['data_servico']),
+                    veiculo=item['veiculo'],
+                    placa=item['placa'],
+                    valor_bruto=item['valor_bruto'],
+                    porcentagem_comissao=item['porcentagem_comissao'],
+                    observacao=item['observacao'],
+                    valor_pago=item['valor_pago'],
+                    quitado=item['quitado'],
+                    comissao_recebida=item['comissao_recebida'],
+                    cliente_id=item['cliente_id']
+                )
+                db.session.add(servico)
+            db.session.commit()
+
+            # Importar pagamentos
+            for item in json_data.get('pagamentos', []):
+                pagamento = Pagamento(
+                    id=item['id'],
+                    data_pagamento=datetime.fromisoformat(item['data_pagamento']),
+                    valor=item['valor'],
+                    cliente_id=item['cliente_id']
+                )
+                db.session.add(pagamento)
+            db.session.commit()
+
+            flash('Dados importados com sucesso!', 'success')
+
+        except json.JSONDecodeError:
+            flash('Erro ao ler o arquivo JSON. Verifique se o formato está correto.', 'danger')
+        except Exception as e:
+            flash(f'Erro ao importar dados: {e}', 'danger')
+    else:
+        flash('Formato de arquivo inválido. Por favor, selecione um arquivo JSON.', 'danger')
+
+    return redirect(url_for('backup'))
 

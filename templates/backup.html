@@ -1,0 +1,42 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Backup e Restauração</h1>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          Exportar Dados
+        </div>
+        <div class="card-body">
+          <p class="card-text">Exporte todos os seus dados (clientes, serviços, despesas, pagamentos) para um arquivo JSON.</p>
+          <a href="{{ url_for('export_data') }}" class="btn btn-primary">
+            <i class="fas fa-download"></i> Exportar Backup (JSON)
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          Importar Dados
+        </div>
+        <div class="card-body">
+          <p class="card-text">Importe dados de um arquivo JSON de backup. <strong>Atenção: Isso apagará todos os dados existentes antes de importar os novos.</strong></p>
+          <form action="{{ url_for('import_data') }}" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Tem certeza que deseja importar? Todos os dados atuais serão apagados e substituídos pelos dados do arquivo.');">
+            <div class="mb-3">
+              <label for="backupFile" class="form-label">Selecione o arquivo JSON:</label>
+              <input class="form-control" type="file" id="backupFile" name="backup_file" accept=".json" required>
+            </div>
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-upload"></i> Importar Backup
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
