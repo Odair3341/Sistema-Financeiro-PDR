@@ -221,6 +221,8 @@ def relatorios():
 def backup():
     return render_template('backup.html')
 
+
+
 @app.route('/relatorio/comissoes', methods=['GET', 'POST'])
 def relatorio_comissoes():
     # Filtra serviços que geram comissão
@@ -417,4 +419,8 @@ def import_data():
         flash('Formato de arquivo inválido. Por favor, selecione um arquivo JSON.', 'danger')
 
     return redirect(url_for('backup'))
+
+
+
+
 
