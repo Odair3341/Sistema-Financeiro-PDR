@@ -364,14 +364,13 @@ def import_data():
 
             # Importar clientes
             for item in json_data.get('clientes', []):
-                cliente = Cliente(id=int(item['id']), nome=item['nome'])
+                cliente = Cliente(nome=item['nome'])
                 db.session.add(cliente)
             db.session.commit()
 
             # Importar despesas
             for item in json_data.get('despesas', []):
                 despesa = Despesa(
-                    id=int(item['id']),
                     descricao=item['descricao'],
                     valor=item['valor'],
                     data_vencimento=datetime.fromisoformat(item['data_vencimento']),
@@ -383,7 +382,6 @@ def import_data():
             # Importar serviços
             for item in json_data.get('servicos', []):
                 servico = Servico(
-                    id=int(item['id']),
                     data_servico=datetime.fromisoformat(item['data']),
                     veiculo=item['veiculo'],
                     placa=item['placa'],
@@ -401,7 +399,6 @@ def import_data():
             # Importar pagamentos
             for item in json_data.get('pagamentos', []):
                 pagamento = Pagamento(
-                    id=int(item['id']),
                     data_pagamento=datetime.fromisoformat(item['data_pagamento']),
                     valor=item['valor'],
                     cliente_id=int(item['cliente_id'])
