@@ -3,7 +3,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1 class="mb-4">Painel de Controle</h1>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Painel de Controle</h1>
+    <a href="{{ url_for('export_data') }}" class="btn btn-secondary">
+        <i class="fas fa-download"></i> Exportar Backup (JSON)
+    </a>
+</div>
 
   <div class="row">
     <!-- Card Total a Receber -->
