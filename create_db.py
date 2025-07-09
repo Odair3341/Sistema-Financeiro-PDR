@@ -19,4 +19,8 @@ with app.app_context():
             if col['name'] == 'id':
                 print(f"Tipo da coluna 'id' na tabela 'servico': {col['type']}")
 
+    # Explicitamente descartar o engine para limpar o pool de conexões
+    db.engine.dispose()
+    print("db.engine.dispose() executado para limpar o pool de conexões.")
+
 print("create_db.py finalizado.")
