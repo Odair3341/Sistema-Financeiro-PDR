@@ -4,7 +4,11 @@ from sqlalchemy import inspect
 print("Iniciando create_db.py...")
 
 with app.app_context():
-    print("Dentro do contexto da aplicação. Tentando criar todas as tabelas...")
+    print("Dentro do contexto da aplicação.")
+    print("Tentando apagar todas as tabelas existentes (db.drop_all())...")
+    db.drop_all()
+    print("db.drop_all() executado.")
+    print("Tentando criar todas as tabelas (db.create_all())...")
     db.create_all()
     print("db.create_all() executado. Verificando tabelas...")
 
