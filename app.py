@@ -16,6 +16,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlit
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# --- Cria as tabelas no contexto da aplicação ---
+with app.app_context():
+    db.create_all()
+
 # --- Modelos do Banco de Dados ---
 
 class Cliente(db.Model):
@@ -255,10 +259,7 @@ def registrar_pagamento(cliente_id):
     return redirect(url_for('cliente_detalhe', cliente_id=cliente_id))
 
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, host='0.0.0.0')
+
 
 @app.route('/backup/export')
 def export_data():
