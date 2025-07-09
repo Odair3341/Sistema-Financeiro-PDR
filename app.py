@@ -364,14 +364,14 @@ def import_data():
 
             # Importar clientes
             for item in json_data.get('clientes', []):
-                cliente = Cliente(id=item['id'], nome=item['nome'])
+                cliente = Cliente(id=int(item['id']), nome=item['nome'])
                 db.session.add(cliente)
             db.session.commit()
 
             # Importar despesas
             for item in json_data.get('despesas', []):
                 despesa = Despesa(
-                    id=item['id'],
+                    id=int(item['id']),
                     descricao=item['descricao'],
                     valor=item['valor'],
                     data_vencimento=datetime.fromisoformat(item['data_vencimento']),
@@ -383,17 +383,17 @@ def import_data():
             # Importar serviços
             for item in json_data.get('servicos', []):
                 servico = Servico(
-                    id=item['id'],
-                    data_servico=datetime.fromisoformat(item['data_servico']),
+                    id=int(item['id']),
+                    data_servico=datetime.fromisoformat(item['data']),
                     veiculo=item['veiculo'],
                     placa=item['placa'],
-                    valor_bruto=item['valor_bruto'],
-                    porcentagem_comissao=item['porcentagem_comissao'],
-                    observacao=item['observacao'],
-                    valor_pago=item['valor_pago'],
-                    quitado=item['quitado'],
-                    comissao_recebida=item['comissao_recebida'],
-                    cliente_id=item['cliente_id']
+                    valor_bruto=item['valorBruto'],
+                    porcentagem_comissao=item['porcentagem'],
+                    observacao=item.get('observacao', ''), # Observacao pode não existir
+                    valor_pago=item.get('valor_pago', 0.0),
+                    quitado=item.get('quitado', False),
+                    comissao_recebida=item.get('comissao_recebida', 0.0),
+                    cliente_id=int(item['clienteId'])
                 )
                 db.session.add(servico)
             db.session.commit()
@@ -401,10 +401,10 @@ def import_data():
             # Importar pagamentos
             for item in json_data.get('pagamentos', []):
                 pagamento = Pagamento(
-                    id=item['id'],
+                    id=int(item['id']),
                     data_pagamento=datetime.fromisoformat(item['data_pagamento']),
                     valor=item['valor'],
-                    cliente_id=item['cliente_id']
+                    cliente_id=int(item['cliente_id'])
                 )
                 db.session.add(pagamento)
             db.session.commit()
