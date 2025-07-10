@@ -23,13 +23,13 @@ with app.app_context():
 # --- Modelos do Banco de Dados ---
 
 class Cliente(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     nome = db.Column(db.String(100), nullable=False, unique=True)
     servicos = db.relationship('Servico', backref='cliente', lazy=True)
     pagamentos = db.relationship('Pagamento', backref='cliente', lazy=True)
 
 class Servico(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     data_servico = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     veiculo = db.Column(db.String(100), nullable=False)
     placa = db.Column(db.String(20), nullable=False)
@@ -42,14 +42,14 @@ class Servico(db.Model):
     cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
 
 class Despesa(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     descricao = db.Column(db.String(200), nullable=False)
     valor = db.Column(db.Float, nullable=False)
     data_vencimento = db.Column(db.DateTime, nullable=False)
     pago = db.Column(db.Boolean, default=False)
 
 class Pagamento(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     data_pagamento = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     valor = db.Column(db.Float, nullable=False)
     cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
