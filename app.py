@@ -362,10 +362,13 @@ def import_data():
             db.session.query(Cliente).delete()
             db.session.commit()
 
-            # Importar clientes
+            # Importar clientes e criar mapeamento de IDs
+            old_to_new_client_id_map = {}
             for item in json_data.get('clientes', []):
                 cliente = Cliente(nome=item['nome'])
                 db.session.add(cliente)
+                db.session.flush() # Garante que o ID seja gerado antes do commit final
+                old_to_new_client_id_map[item['id']] = cliente.id
             db.session.commit()
 
             # Importar despesas
@@ -381,27 +384,35 @@ def import_data():
 
             # Importar serviços
             for item in json_data.get('servicos', []):
+                new_cliente_id = old_to_new_client_id_map.get(item['cliente_id'])
+                if new_cliente_id is None:
+                    print(f"Aviso: cliente_id {item['cliente_id']} não encontrado no mapeamento. Pulando serviço.")
+                    continue
                 servico = Servico(
-                    data_servico=datetime.fromisoformat(item['data']),
+                    data_servico=datetime.fromisoformat(item['data_servico']),
                     veiculo=item['veiculo'],
                     placa=item['placa'],
-                    valor_bruto=item['valorBruto'],
-                    porcentagem_comissao=item['porcentagem'],
-                    observacao=item.get('observacao', ''), # Observacao pode não existir
+                    valor_bruto=item['valor_bruto'],
+                    porcentagem_comissao=item['porcentagem_comissao'],
+                    observacao=item.get('observacao', ''),
                     valor_pago=item.get('valor_pago', 0.0),
                     quitado=item.get('quitado', False),
                     comissao_recebida=item.get('comissao_recebida', 0.0),
-                    cliente_id=int(item['clienteId'])
+                    cliente_id=new_cliente_id
                 )
                 db.session.add(servico)
             db.session.commit()
 
             # Importar pagamentos
             for item in json_data.get('pagamentos', []):
+                new_cliente_id = old_to_new_client_id_map.get(item['cliente_id'])
+                if new_cliente_id is None:
+                    print(f"Aviso: cliente_id {item['cliente_id']} não encontrado no mapeamento. Pulando pagamento.")
+                    continue
                 pagamento = Pagamento(
                     data_pagamento=datetime.fromisoformat(item['data_pagamento']),
                     valor=item['valor'],
-                    cliente_id=int(item['cliente_id'])
+                    cliente_id=new_cliente_id
                 )
                 db.session.add(pagamento)
             db.session.commit()
