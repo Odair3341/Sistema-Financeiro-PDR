@@ -39,7 +39,7 @@ class Servico(db.Model):
     valor_pago = db.Column(db.Float, default=0.0)
     quitado = db.Column(db.Boolean, default=False)
     comissao_recebida = db.Column(db.Float, default=0.0)
-    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
+    cliente_id = db.Column(db.BigInteger, db.ForeignKey('cliente.id'), nullable=False)
 
 class Despesa(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
@@ -52,7 +52,7 @@ class Pagamento(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     data_pagamento = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     valor = db.Column(db.Float, nullable=False)
-    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
+    cliente_id = db.Column(db.BigInteger, db.ForeignKey('cliente.id'), nullable=False)
 
 
 # --- Rotas da Aplicação ---
