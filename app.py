@@ -384,16 +384,20 @@ def import_data():
 
             # Importar serviços
             for item in json_data.get('servicos', []):
-                new_cliente_id = old_to_new_client_id_map.get(item['cliente_id'])
+                original_cliente_id = item.get('cliente_id') or item.get('clienteId')
+                if original_cliente_id is None:
+                    print(f"Aviso: cliente_id ou clienteId não encontrado para o serviço. Pulando serviço.")
+                    continue
+                new_cliente_id = old_to_new_client_id_map.get(original_cliente_id)
                 if new_cliente_id is None:
-                    print(f"Aviso: cliente_id {item['cliente_id']} não encontrado no mapeamento. Pulando serviço.")
+                    print(f"Aviso: cliente_id {original_cliente_id} não encontrado no mapeamento. Pulando serviço.")
                     continue
                 servico = Servico(
-                    data_servico=datetime.fromisoformat(item['data_servico']),
+                    data_servico=datetime.fromisoformat(item['data']),
                     veiculo=item['veiculo'],
                     placa=item['placa'],
-                    valor_bruto=item['valor_bruto'],
-                    porcentagem_comissao=item['porcentagem_comissao'],
+                    valor_bruto=item['valorBruto'],
+                    porcentagem_comissao=item['porcentagem'],
                     observacao=item.get('observacao', ''),
                     valor_pago=item.get('valor_pago', 0.0),
                     quitado=item.get('quitado', False),
@@ -405,12 +409,22 @@ def import_data():
 
             # Importar pagamentos
             for item in json_data.get('pagamentos', []):
-                new_cliente_id = old_to_new_client_id_map.get(item['cliente_id'])
-                if new_cliente_id is None:
-                    print(f"Aviso: cliente_id {item['cliente_id']} não encontrado no mapeamento. Pulando pagamento.")
+                original_cliente_id = item.get('cliente_id') or item.get('clienteId')
+                if original_cliente_id is None:
+                    print(f"Aviso: cliente_id ou clienteId não encontrado para o pagamento. Pulando pagamento.")
                     continue
+                new_cliente_id = old_to_new_client_id_map.get(original_cliente_id)
+                if new_cliente_id is None:
+                    print(f"Aviso: cliente_id {original_cliente_id} não encontrado no mapeamento. Pulando pagamento.")
+                    continue
+                
+                data_pagamento_str = item.get('data_pagamento') or item.get('data')
+                if data_pagamento_str is None:
+                    print(f"Aviso: data_pagamento ou data não encontrada para o pagamento. Pulando pagamento.")
+                    continue
+
                 pagamento = Pagamento(
-                    data_pagamento=datetime.fromisoformat(item['data_pagamento']),
+                    data_pagamento=datetime.fromisoformat(data_pagamento_str),
                     valor=item['valor'],
                     cliente_id=new_cliente_id
                 )
