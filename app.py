@@ -392,8 +392,14 @@ def import_data():
                 if new_cliente_id is None:
                     print(f"Aviso: cliente_id {original_cliente_id} não encontrado no mapeamento. Pulando serviço.")
                     continue
+                
+                data_servico_str = item.get('data_servico') or item.get('data')
+                if data_servico_str is None:
+                    print(f"Aviso: data_servico ou data não encontrada para o serviço. Pulando serviço.")
+                    continue
+
                 servico = Servico(
-                    data_servico=datetime.fromisoformat(item['data']),
+                    data_servico=datetime.fromisoformat(data_servico_str),
                     veiculo=item['veiculo'],
                     placa=item['placa'],
                     valor_bruto=item['valorBruto'],
