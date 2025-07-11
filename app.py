@@ -398,12 +398,22 @@ def import_data():
                     print(f"Aviso: data_servico ou data não encontrada para o serviço. Pulando serviço.")
                     continue
 
+                valor_bruto_val = item.get('valor_bruto') or item.get('valorBruto')
+                if valor_bruto_val is None:
+                    print(f"Aviso: valor_bruto ou valorBruto não encontrado para o serviço. Pulando serviço.")
+                    continue
+
+                porcentagem_comissao_val = item.get('porcentagem_comissao') or item.get('porcentagem')
+                if porcentagem_comissao_val is None:
+                    print(f"Aviso: porcentagem_comissao ou porcentagem não encontrada para o serviço. Pulando serviço.")
+                    continue
+
                 servico = Servico(
                     data_servico=datetime.fromisoformat(data_servico_str),
                     veiculo=item['veiculo'],
                     placa=item['placa'],
-                    valor_bruto=item['valorBruto'],
-                    porcentagem_comissao=item['porcentagem'],
+                    valor_bruto=float(valor_bruto_val),
+                    porcentagem_comissao=float(porcentagem_comissao_val),
                     observacao=item.get('observacao', ''),
                     valor_pago=item.get('valor_pago', 0.0),
                     quitado=item.get('quitado', False),
