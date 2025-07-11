@@ -210,7 +210,7 @@ def despesas():
 
 @app.route('/comissoes')
 def comissoes():
-    todos_servicos = Servico.query.order_by(Servico.data_servico.desc()).all()
+    todos_servicos = Servico.query.order_by(Servico.data_servico.asc()).all()
     return render_template('comissoes.html', servicos=todos_servicos)
 
 @app.route('/relatorios')
