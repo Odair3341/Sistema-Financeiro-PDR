@@ -90,7 +90,7 @@ def receber_comissao(servico_id):
 
     if valor_receber <= 0:
         flash('O valor a receber deve ser positivo.', 'danger')
-    elif valor_receber > comissao_restante:
+    elif valor_receber > comissao_restante + 0.001: # Adiciona uma pequena tolerância para ponto flutuante
         flash(f'O valor a receber (R$ {valor_receber:.2f}) é maior que o restante da comissão (R$ {comissao_restante:.2f}).', 'warning')
     else:
         servico.comissao_recebida += valor_receber
