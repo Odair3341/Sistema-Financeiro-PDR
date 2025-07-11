@@ -37,7 +37,7 @@
               <td>R$ {{ "%.2f"|format(comissao_servico) }}</td>
               <td>
                 {% set comissao_restante = comissao_servico - servico.comissao_recebida %}
-                {% if comissao_restante <= 0 %}
+                {% if comissao_restante <= 0.001 %}
                   <span class="badge bg-success">Recebida Integralmente</span>
                 {% elif servico.comissao_recebida > 0 %}
                   <span class="badge bg-info">Recebida Parcialmente</span>

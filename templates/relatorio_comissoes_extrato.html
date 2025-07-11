@@ -33,6 +33,7 @@
                     <th>Descrição</th>
                     <th class="text-end">Comissão a Receber</th>
                     <th class="text-end">Comissão Recebida</th>
+                    <th class="text-end">Total Recebido (Serviço)</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,10 +45,12 @@
                         {% if t.debito_credito == 'debito' %}
                             <td class="text-end text-danger">R$ {{ "%.2f"|format(t.valor) }}</td>
                             <td></td>
+                            <td class="text-end">R$ {{ "%.2f"|format(t.comissao_recebida) }}</td>
                             {% set saldo_comissao.valor = saldo_comissao.valor - t.valor %}
                         {% else %}
                             <td></td>
                             <td class="text-end text-success">R$ {{ "%.2f"|format(t.valor) }}</td>
+                            <td class="text-end">R$ {{ "%.2f"|format(t.comissao_recebida) }}</td>
                             {% set saldo_comissao.valor = saldo_comissao.valor + t.valor %}
                         {% endif %}
                     </tr>

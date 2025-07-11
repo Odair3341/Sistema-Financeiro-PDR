@@ -232,10 +232,10 @@ def relatorio_comissoes():
     for s in servicos_comissao:
         comissao_total_servico = s.valor_bruto * (s.porcentagem_comissao / 100)
         # Adiciona a comissão total como um débito (a receber)
-        transacoes_comissao.append({'data': s.data_servico, 'tipo': 'Comissão a Receber', 'descricao': f'Comissão de {s.cliente.nome} - {s.veiculo} ({s.placa})', 'valor': comissao_total_servico, 'debito_credito': 'debito'})
+        transacoes_comissao.append({'data': s.data_servico, 'tipo': 'Comissão a Receber', 'descricao': f'Comissão de {s.cliente.nome} - {s.veiculo} ({s.placa})', 'valor': comissao_total_servico, 'debito_credito': 'debito', 'comissao_recebida': s.comissao_recebida})
         # Adiciona o valor já recebido como um crédito
         if s.comissao_recebida > 0:
-            transacoes_comissao.append({'data': s.data_servico, 'tipo': 'Comissão Recebida', 'descricao': f'Recebimento de comissão - {s.cliente.nome} ({s.placa})', 'valor': s.comissao_recebida, 'debito_credito': 'credito'})
+            transacoes_comissao.append({'data': s.data_servico, 'tipo': 'Comissão Recebida', 'descricao': f'Recebimento de comissão - {s.cliente.nome} ({s.placa})', 'valor': s.comissao_recebida, 'debito_credito': 'credito', 'comissao_recebida': s.comissao_recebida})
     
     transacoes_comissao.sort(key=lambda x: x['data'])
 
