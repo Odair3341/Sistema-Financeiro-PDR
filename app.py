@@ -365,9 +365,10 @@ def import_data():
             # Importar clientes e criar mapeamento de IDs
             old_to_new_client_id_map = {}
             for item in json_data.get('clientes', []):
-                cliente = Cliente(nome=item['nome'])
+                # Explicitamente define o ID do cliente com o ID do backup JSON
+                cliente = Cliente(id=item['id'], nome=item['nome'])
                 db.session.add(cliente)
-                db.session.flush() # Garante que o ID seja gerado antes do commit final
+                db.session.flush() # Garante que o ID seja gerado/atribuído antes do commit final
                 old_to_new_client_id_map[item['id']] = cliente.id
             db.session.commit()
 
