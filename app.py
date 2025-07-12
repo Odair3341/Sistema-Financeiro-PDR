@@ -410,6 +410,7 @@ def import_data():
                     continue
 
                 servico = Servico(
+                    id=item['id'], # Adicionado para usar o ID do backup
                     data_servico=datetime.fromisoformat(data_servico_str),
                     veiculo=item['veiculo'],
                     placa=item['placa'],
