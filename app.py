@@ -208,6 +208,25 @@ def despesas():
     todas_despesas = Despesa.query.order_by(Despesa.data_vencimento.asc()).all()
     return render_template('despesas.html', despesas=todas_despesas)
 
+
+@app.route('/despesa/marcar_paga/<int:despesa_id>', methods=['POST'])
+def marcar_despesa_paga(despesa_id):
+    despesa = Despesa.query.get_or_404(despesa_id)
+    despesa.pago = True
+    db.session.commit()
+    flash(f'Despesa "{despesa.descricao}" marcada como paga.', 'success')
+    return redirect(url_for('despesas'))
+
+
+@app.route('/despesa/deletar/<int:despesa_id>', methods=['POST'])
+def deletar_despesa(despesa_id):
+    despesa = Despesa.query.get_or_404(despesa_id)
+    db.session.delete(despesa)
+    db.session.commit()
+    flash(f'Despesa "{despesa.descricao}" foi deletada.', 'success')
+    return redirect(url_for('despesas'))
+
+
 @app.route('/comissoes')
 def comissoes():
     todos_servicos = Servico.query.order_by(Servico.data_servico.asc()).all()
