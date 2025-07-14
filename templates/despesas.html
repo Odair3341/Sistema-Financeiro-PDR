@@ -1,77 +1,259 @@
-
-
 {% extends 'base.html' %}
 
+{% block title %}Despesas - Oliveira Martelinho de Ouro{% endblock %}
+
 {% block content %}
-  <h1 class="mb-4">Gerenciar Despesas</h1>
-
-  <!-- Formulário de Cadastro de Despesa -->
-  <div class="card mb-4">
-    <div class="card-header">
-      Adicionar Nova Despesa
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-1 text-primary">
+            <i class="bi bi-receipt me-2"></i>Gerenciar Despesas
+        </h1>
+        <p class="text-muted mb-0">Controle todas as despesas do seu negócio</p>
     </div>
-    <div class="card-body">
-      <form action="{{ url_for('despesas') }}" method="POST">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="descricao" class="form-label">Descrição</label>
-            <input type="text" class="form-control" id="descricao" name="descricao" required>
-          </div>
-          <div class="col-md-3 mb-3">
-            <label for="valor" class="form-label">Valor (R$)</label>
-            <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
-          </div>
-          <div class="col-md-3 mb-3">
-            <label for="data_vencimento" class="form-label">Data de Vencimento</label>
-            <input type="date" class="form-control" id="data_vencimento" name="data_vencimento" required>
-          </div>
+</div>
+
+<!-- Resumo das Despesas -->
+<div class="row g-4 mb-4">
+    {% set total_despesas = despesas|sum(attribute='valor') %}
+    {% set despesas_pagas = despesas|selectattr('pago', 'equalto', true)|sum(attribute='valor') %}
+    {% set despesas_pendentes = total_despesas - despesas_pagas %}
+    {% set despesas_vencidas = despesas|selectattr('pago', 'equalto', false)|selectattr('data_vencimento', 'lt', moment().date())|list %}
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-receipt fs-1 text-info"></i>
+                </div>
+                <h4 class="fw-bold text-info">R$ {{ "{:,.2f}".format(total_despesas).replace(',', 'X').replace('.', ',').replace('X', '.') }}</h4>
+                <p class="text-muted mb-0">Total Geral</p>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Adicionar Despesa</button>
-      </form>
     </div>
-  </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                </div>
+                <h4 class="fw-bold text-success">R$ {{ "{:,.2f}".format(despesas_pagas).replace(',', 'X').replace('.', ',').replace('X', '.') }}</h4>
+                <p class="text-muted mb-0">Já Pagas</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-clock fs-1 text-warning"></i>
+                </div>
+                <h4 class="fw-bold text-warning">R$ {{ "{:,.2f}".format(despesas_pendentes).replace(',', 'X').replace('.', ',').replace('X', '.') }}</h4>
+                <p class="text-muted mb-0">Pendentes</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-exclamation-triangle fs-1 text-danger"></i>
+                </div>
+                <h4 class="fw-bold text-danger">{{ despesas_vencidas|length }}</h4>
+                <p class="text-muted mb-0">Vencidas</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-  <!-- Lista de Despesas -->
-  <div class="card">
+<!-- Formulário de Cadastro -->
+<div class="card mb-4">
     <div class="card-header">
-      Despesas Cadastradas
+        <i class="bi bi-plus-circle me-2"></i>Adicionar Nova Despesa
     </div>
     <div class="card-body">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Descrição</th>
-            <th>Vencimento</th>
-            <th>Valor</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for despesa in despesas %}
-            <tr>
-              <td>{{ despesa.descricao }}</td>
-              <td>{{ despesa.data_vencimento.strftime('%d/%m/%Y') }}</td>
-              <td>R$ {{ "%.2f"|format(despesa.valor) }}</td>
-              <td>
-                {% if despesa.pago %}
-                  <span class="badge bg-success">Pago</span>
-                {% else %}
-                  <span class="badge bg-danger">Pendente</span>
-                {% endif %}
-              </td>
-              <td>
-                <!-- Botão para marcar como pago será implementado aqui -->
-              </td>
-            </tr>
-          {% else %}
-            <tr>
-              <td colspan="5" class="text-center">Nenhuma despesa cadastrada ainda.</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+        <form action="{{ url_for('despesas') }}" method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="descricao" class="form-label">
+                        <i class="bi bi-card-text me-1"></i>Descrição da Despesa
+                    </label>
+                    <input type="text" class="form-control" id="descricao" name="descricao" placeholder="Ex: Aluguel, Energia, Material..." required>
+                </div>
+                <div class="col-md-3">
+                    <label for="valor" class="form-label">
+                        <i class="bi bi-currency-dollar me-1"></i>Valor (R$)
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="valor" name="valor" placeholder="0,00" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="data_vencimento" class="form-label">
+                        <i class="bi bi-calendar3 me-1"></i>Data de Vencimento
+                    </label>
+                    <input type="date" class="form-control" id="data_vencimento" name="data_vencimento" required>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-2"></i>Adicionar Despesa
+                </button>
+                <button type="reset" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Limpar
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
-{% endblock %}
+</div>
 
+<!-- Lista de Despesas -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <i class="bi bi-list-ul me-2"></i>Despesas Registradas
+        </div>
+        <span class="badge bg-primary">{{ despesas|length }} despesas</span>
+    </div>
+    <div class="card-body p-0">
+        {% if despesas %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-card-text me-1"></i>Descrição</th>
+                            <th><i class="bi bi-currency-dollar me-1"></i>Valor</th>
+                            <th><i class="bi bi-calendar3 me-1"></i>Vencimento</th>
+                            <th><i class="bi bi-flag me-1"></i>Status</th>
+                            <th><i class="bi bi-gear me-1"></i>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for despesa in despesas %}
+                            {% set hoje = moment().date() if moment else none %}
+                            {% set vencida = despesa.data_vencimento.date() < hoje if hoje and not despesa.pago else false %}
+                            {% set vence_hoje = despesa.data_vencimento.date() == hoje if hoje and not despesa.pago else false %}
+                            
+                            <tr class="{% if vencida %}table-danger{% elif vence_hoje %}table-warning{% endif %}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-{% if despesa.pago %}success{% elif vencida %}danger{% elif vence_hoje %}warning{% else %}primary{% endif %} bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="bi bi-{% if despesa.pago %}check-circle{% elif vencida %}exclamation-triangle{% elif vence_hoje %}clock{% else %}receipt{% endif %} text-{% if despesa.pago %}success{% elif vencida %}danger{% elif vence_hoje %}warning{% else %}primary{% endif %}"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ despesa.descricao }}</div>
+                                            {% if vencida %}
+                                                <small class="text-danger">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>Vencida
+                                                </small>
+                                            {% elif vence_hoje %}
+                                                <small class="text-warning">
+                                                    <i class="bi bi-clock me-1"></i>Vence hoje
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-{% if despesa.pago %}success{% else %}danger{% endif %}">
+                                        R$ {{ "{:,.2f}".format(despesa.valor).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ despesa.data_vencimento.strftime('%d/%m/%Y') }}</div>
+                                    <small class="text-muted">{{ despesa.data_vencimento.strftime('%A') }}</small>
+                                </td>
+                                <td>
+                                    {% if despesa.pago %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Paga
+                                        </span>
+                                    {% elif vencida %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Vencida
+                                        </span>
+                                    {% elif vence_hoje %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-clock me-1"></i>Vence Hoje
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-clock me-1"></i>Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        {% if not despesa.pago %}
+                                            <form action="{{ url_for('marcar_despesa_paga', despesa_id=despesa.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-success btn-sm" title="Marcar como Paga">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                        
+                                        <form action="{{ url_for('deletar_despesa', despesa_id=despesa.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja deletar esta despesa?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Deletar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td class="text-end fw-bold">TOTAIS:</td>
+                            <td class="fw-bold text-info">R$ {{ "{:,.2f}".format(total_despesas).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                            <td colspan="3">
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <small class="text-success">Pagas: R$ {{ "{:,.2f}".format(despesas_pagas).replace(',', 'X').replace('.', ',').replace('X', '.') }}</small>
+                                    </div>
+                                    <div class="col">
+                                        <small class="text-warning">Pendentes: R$ {{ "{:,.2f}".format(despesas_pendentes).replace(',', 'X').replace('.', ',').replace('X', '.') }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-receipt display-1 text-muted"></i>
+                </div>
+                <h5 class="text-muted">Nenhuma despesa registrada</h5>
+                <p class="text-muted">Comece adicionando sua primeira despesa usando o formulário acima.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Definir data atual como padrão
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('data_vencimento').value = hoje;
+        
+        // Destacar despesas vencidas
+        const rows = document.querySelectorAll('tr.table-danger, tr.table-warning');
+        rows.forEach(row => {
+            row.style.animation = 'pulse 2s infinite';
+        });
+    });
+    
+    // Animação para destacar itens importantes
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

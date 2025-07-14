@@ -1,0 +1,62 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Painel de Controle</h1>
+    <a href="{{ url_for('export_data') }}" class="btn btn-secondary">
+        <i class="fas fa-download"></i> Exportar Backup (JSON)
+    </a>
+</div>
+
+  <div class="row">
+    <!-- Card Total a Receber -->
+    <div class="col-md-4 mb-4">
+      <div class="card text-white bg-success">
+        <div class="card-header">Comissões a Receber</div>
+        <div class="card-body">
+          <h5 class="card-title">R$ {{ "%.2f"|format(total_a_receber) }}</h5>
+          <p class="card-text">Soma das comissões pendentes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Total Recebido -->
+    <div class="col-md-4 mb-4">
+      <div class="card text-white bg-primary">
+        <div class="card-header">Comissões Recebidas</div>
+        <div class="card-body">
+          <h5 class="card-title">R$ {{ "%.2f"|format(total_recebido_geral) }}</h5>
+          <p class="card-text">Soma de todas as comissões já recebidas.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Total a Pagar -->
+    <div class="col-md-4 mb-4">
+      <div class="card text-white bg-danger">
+        <div class="card-header">Total a Pagar</div>
+        <div class="card-body">
+          <h5 class="card-title">R$ {{ "%.2f"|format(total_a_pagar) }}</h5>
+          <p class="card-text">Soma das despesas pendentes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Saldo -->
+    <div class="col-md-4 mb-4">
+      <div class="card text-dark bg-info">
+        <div class="card-header">Balanço Geral</div>
+        <div class="card-body">
+          <h5 class="card-title">R$ {{ "%.2f"|format(saldo) }}</h5>
+          <p class="card-text">Total recebido de serviços - Total de despesas cadastradas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Futuramente, podemos adicionar gráficos e listas de atividades recentes aqui -->
+
+{% endblock %}
+

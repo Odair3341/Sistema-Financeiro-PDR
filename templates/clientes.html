@@ -1,43 +1,155 @@
-
 {% extends 'base.html' %}
 
+{% block title %}Clientes - Oliveira Martelinho de Ouro{% endblock %}
+
 {% block content %}
-  <h1 class="mb-4">Gerenciar Clientes</h1>
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-1 text-primary">
+            <i class="bi bi-people me-2"></i>Gerenciar Clientes
+        </h1>
+        <p class="text-muted mb-0">Cadastre e gerencie seus clientes</p>
+    </div>
+</div>
 
-  <!-- Formulário de Cadastro -->
-  <div class="card mb-4">
+<!-- Formulário de Cadastro -->
+<div class="card mb-4">
     <div class="card-header">
-      Adicionar Novo Cliente
+        <i class="bi bi-person-plus me-2"></i>Adicionar Novo Cliente
     </div>
     <div class="card-body">
-      <form action="{{ url_for('clientes') }}" method="POST">
-        <div class="mb-3">
-          <label for="nome" class="form-label">Nome do Cliente</label>
-          <input type="text" class="form-control" id="nome" name="nome" required>
+        <form action="{{ url_for('clientes') }}" method="POST">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label for="nome" class="form-label">
+                        <i class="bi bi-person me-1"></i>Nome Completo do Cliente
+                    </label>
+                    <input type="text" class="form-control" id="nome" name="nome" placeholder="Digite o nome completo" required>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle me-2"></i>Adicionar Cliente
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Clientes -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <i class="bi bi-list-ul me-2"></i>Clientes Cadastrados
         </div>
-        <button type="submit" class="btn btn-primary">Adicionar Cliente</button>
-      </form>
+        <span class="badge bg-primary">{{ clientes|length }} clientes</span>
     </div>
-  </div>
-
-  <!-- Lista de Clientes -->
-  <div class="card">
-    <div class="card-header">
-      Clientes Cadastrados
-    </div>
-    <div class="card-body">
-      <ul class="list-group">
+    <div class="card-body p-0">
         {% if clientes %}
-          {% for cliente in clientes %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <a href="{{ url_for('cliente_detalhe', cliente_id=cliente.id) }}" class="text-decoration-none">{{ cliente.nome }}</a>
-              <!-- Botões de ação (editar, excluir) podem ser adicionados aqui no futuro -->
-            </li>
-          {% endfor %}
+            <div class="list-group list-group-flush">
+                {% for cliente in clientes %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="bi bi-person fs-4 text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 fw-bold">{{ cliente.nome }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3 me-1"></i>Cliente desde: 
+                                        {{ cliente.data_cadastro.strftime('%d/%m/%Y') if cliente.data_cadastro else 'Data não disponível' }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <!-- Estatísticas rápidas do cliente -->
+                                <div class="text-end me-3">
+                                    {% set servicos_cliente = cliente.servicos|length %}
+                                    {% set total_servicos = cliente.servicos|sum(attribute='valor_bruto') %}
+                                    <div class="small">
+                                        <div class="text-muted">Serviços: <span class="fw-bold text-primary">{{ servicos_cliente }}</span></div>
+                                        <div class="text-muted">Total: <span class="fw-bold text-success">R$ {{ "{:,.2f}".format(total_servicos or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}</span></div>
+                                    </div>
+                                </div>
+                                
+                                <a href="{{ url_for('cliente_detalhe', cliente_id=cliente.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye me-1"></i>Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
-          <li class="list-group-item">Nenhum cliente cadastrado ainda.</li>
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-people display-1 text-muted"></i>
+                </div>
+                <h5 class="text-muted">Nenhum cliente cadastrado</h5>
+                <p class="text-muted">Comece adicionando seu primeiro cliente usando o formulário acima.</p>
+            </div>
         {% endif %}
-      </ul>
     </div>
-  </div>
+</div>
+
+<!-- Estatísticas dos Clientes -->
+{% if clientes %}
+<div class="row g-4 mt-4">
+    <div class="col-lg-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-people fs-1 text-primary"></i>
+                </div>
+                <h4 class="fw-bold text-primary">{{ clientes|length }}</h4>
+                <p class="text-muted mb-0">Total de Clientes</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-graph-up fs-1 text-success"></i>
+                </div>
+                {% set clientes_ativos = clientes|selectattr('servicos')|list|length %}
+                <h4 class="fw-bold text-success">{{ clientes_ativos }}</h4>
+                <p class="text-muted mb-0">Clientes Ativos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-star fs-1 text-warning"></i>
+                </div>
+                {% set cliente_top = clientes|max(attribute='servicos')|default({'servicos': []}) %}
+                <h4 class="fw-bold text-warning">{{ cliente_top.servicos|length if cliente_top.servicos else 0 }}</h4>
+                <p class="text-muted mb-0">Maior Histórico</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .list-group-item:hover {
+        background-color: #f8fafc;
+        transform: translateX(5px);
+        transition: all 0.3s ease;
+    }
+    
+    .list-group-item {
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .list-group-item:hover {
+        border-left-color: var(--bs-primary);
+    }
+</style>
 {% endblock %}

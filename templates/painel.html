@@ -1,62 +1,272 @@
-
-
 {% extends 'base.html' %}
 
+{% block title %}Dashboard - Oliveira Martelinho de Ouro{% endblock %}
+
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Painel de Controle</h1>
-    <a href="{{ url_for('export_data') }}" class="btn btn-secondary">
-        <i class="fas fa-download"></i> Exportar Backup (JSON)
-    </a>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-1 text-primary">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard Financeiro
+                </h1>
+                <p class="text-muted mb-0">Visão geral do seu negócio</p>
+            </div>
+            <div class="text-end">
+                <small class="text-muted">Atualizado em</small><br>
+                <strong class="text-primary">{{ moment().format('DD/MM/YYYY HH:mm') if moment else 'Agora' }}</strong>
+            </div>
+        </div>
+    </div>
 </div>
 
-  <div class="row">
-    <!-- Card Total a Receber -->
-    <div class="col-md-4 mb-4">
-      <div class="card text-white bg-success">
-        <div class="card-header">Comissões a Receber</div>
-        <div class="card-body">
-          <h5 class="card-title">R$ {{ "%.2f"|format(total_a_receber) }}</h5>
-          <p class="card-text">Soma das comissões pendentes.</p>
+<!-- Cards de Resumo -->
+<div class="row g-4 mb-5">
+    <!-- Saldo Atual -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-custom">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                        <i class="bi bi-wallet2 fs-1 text-primary"></i>
+                    </div>
+                </div>
+                <h6 class="text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Saldo Atual</h6>
+                <h3 class="mb-0 fw-bold {% if saldo >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    R$ {{ "{:,.2f}".format(saldo).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                </h3>
+                <small class="text-muted">
+                    {% if saldo >= 0 %}
+                        <i class="bi bi-arrow-up text-success"></i> Positivo
+                    {% else %}
+                        <i class="bi bi-arrow-down text-danger"></i> Negativo
+                    {% endif %}
+                </small>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- Card Total Recebido -->
-    <div class="col-md-4 mb-4">
-      <div class="card text-white bg-primary">
-        <div class="card-header">Comissões Recebidas</div>
-        <div class="card-body">
-          <h5 class="card-title">R$ {{ "%.2f"|format(total_recebido_geral) }}</h5>
-          <p class="card-text">Soma de todas as comissões já recebidas.</p>
+    <!-- Total Recebido -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-custom">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                        <i class="bi bi-arrow-down-circle fs-1 text-success"></i>
+                    </div>
+                </div>
+                <h6 class="text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total Recebido</h6>
+                <h3 class="mb-0 fw-bold text-success">
+                    R$ {{ "{:,.2f}".format(total_recebido_geral).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                </h3>
+                <small class="text-muted">
+                    <i class="bi bi-check-circle text-success"></i> Comissões pagas
+                </small>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- Card Total a Pagar -->
-    <div class="col-md-4 mb-4">
-      <div class="card text-white bg-danger">
-        <div class="card-header">Total a Pagar</div>
-        <div class="card-body">
-          <h5 class="card-title">R$ {{ "%.2f"|format(total_a_pagar) }}</h5>
-          <p class="card-text">Soma das despesas pendentes.</p>
+    <!-- Pendente -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-custom">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                        <i class="bi bi-clock fs-1 text-warning"></i>
+                    </div>
+                </div>
+                <h6 class="text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">A Receber</h6>
+                <h3 class="mb-0 fw-bold text-warning">
+                    R$ {{ "{:,.2f}".format(total_a_receber).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                </h3>
+                <small class="text-muted">
+                    <i class="bi bi-hourglass-split text-warning"></i> Comissões pendentes
+                </small>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- Card Saldo -->
-    <div class="col-md-4 mb-4">
-      <div class="card text-dark bg-info">
-        <div class="card-header">Balanço Geral</div>
-        <div class="card-body">
-          <h5 class="card-title">R$ {{ "%.2f"|format(saldo) }}</h5>
-          <p class="card-text">Total recebido de serviços - Total de despesas cadastradas.</p>
+    <!-- Despesas -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-custom">
+            <div class="card-body text-center">
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                        <i class="bi bi-arrow-up-circle fs-1 text-danger"></i>
+                    </div>
+                </div>
+                <h6 class="text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">A Pagar</h6>
+                <h3 class="mb-0 fw-bold text-danger">
+                    R$ {{ "{:,.2f}".format(total_a_pagar).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                </h3>
+                <small class="text-muted">
+                    <i class="bi bi-exclamation-circle text-danger"></i> Despesas pendentes
+                </small>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- Futuramente, podemos adicionar gráficos e listas de atividades recentes aqui -->
+<!-- Ações Rápidas -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-lightning-charge me-2"></i>Ações Rápidas
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('servicos') }}" class="btn btn-primary w-100 py-3">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            <div>
+                                <div class="fw-bold">Novo Serviço</div>
+                                <small>Registrar atendimento</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('clientes') }}" class="btn btn-success w-100 py-3">
+                            <i class="bi bi-person-plus me-2"></i>
+                            <div>
+                                <div class="fw-bold">Novo Cliente</div>
+                                <small>Cadastrar cliente</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('comissoes') }}" class="btn btn-warning w-100 py-3">
+                            <i class="bi bi-cash-coin me-2"></i>
+                            <div>
+                                <div class="fw-bold">Comissões</div>
+                                <small>Gerenciar pagamentos</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{{ url_for('backup') }}" class="btn btn-secondary w-100 py-3">
+                            <i class="bi bi-cloud-download me-2"></i>
+                            <div>
+                                <div class="fw-bold">Backup</div>
+                                <small>Salvar dados</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Resumo Visual -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up me-2"></i>Resumo Financeiro
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="border-end">
+                            <h4 class="text-success mb-1">{{ "{:,.0f}".format(total_recebido_geral).replace(',', '.') }}</h4>
+                            <small class="text-muted">Total Recebido (R$)</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="border-end">
+                            <h4 class="text-warning mb-1">{{ "{:,.0f}".format(total_a_receber).replace(',', '.') }}</h4>
+                            <small class="text-muted">A Receber (R$)</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h4 class="text-danger mb-1">{{ "{:,.0f}".format(total_a_pagar).replace(',', '.') }}</h4>
+                        <small class="text-muted">A Pagar (R$)</small>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <h5 class="mb-3">Status Financeiro</h5>
+                    {% set percentual_recebido = (total_recebido_geral / (total_recebido_geral + total_a_receber) * 100) if (total_recebido_geral + total_a_receber) > 0 else 0 %}
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar bg-success" style="width: {{ percentual_recebido }}%">
+                            {{ "{:.1f}".format(percentual_recebido) }}% Recebido
+                        </div>
+                    </div>
+                    <small class="text-muted">Percentual de comissões já recebidas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>Informações do Sistema
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-gold bg-opacity-10 rounded-circle p-2 me-3">
+                        <i class="bi bi-building text-gold"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Oliveira Martelinho</div>
+                        <small class="text-muted">Funilaria e Pintura</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Sistema:</span>
+                        <span class="fw-bold">Financeiro v2.0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Status:</span>
+                        <span class="badge bg-success">Online</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Último backup:</span>
+                        <span class="text-primary">Hoje</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-3 border-top">
+                    <a href="{{ url_for('backup') }}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Fazer Backup Agora
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress {
+        border-radius: 10px;
+        background-color: #f1f5f9;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    .border-end {
+        border-right: 1px solid #e2e8f0 !important;
+    }
+    
+    @media (max-width: 768px) {
+        .border-end {
+            border-right: none !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            padding-bottom: 1rem;
+        }
+    }
+</style>
 {% endblock %}
-

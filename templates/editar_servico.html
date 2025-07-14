@@ -1,78 +1,217 @@
-
 {% extends 'base.html' %}
 
+{% block title %}Serviços - Oliveira Martelinho de Ouro{% endblock %}
+
 {% block content %}
-  <h1 class="mb-4">Editar Serviço</h1>
-
-  <div class="card mb-4">
-    <div class="card-body">
-      <form action="{{ url_for('editar_servico', servico_id=servico.id) }}" method="POST">
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label for="data_servico" class="form-label">Data do Serviço</label>
-            <input type="date" class="form-control" id="data_servico" name="data_servico" value="{{ servico.data_servico.strftime('%Y-%m-%d') }}" required>
-          </div>
-          <div class="col-md-8 mb-3">
-            <label for="cliente_id" class="form-label">Cliente</label>
-            <select class="form-select" id="cliente_id" name="cliente_id" required>
-              {% for cliente in clientes %}
-                <option value="{{ cliente.id }}" {% if cliente.id == servico.cliente_id %}selected{% endif %}>{{ cliente.nome }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="veiculo" class="form-label">Veículo</label>
-            <input type="text" class="form-control" id="veiculo" name="veiculo" value="{{ servico.veiculo }}" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="placa" class="form-label">Placa</label>
-            <input type="text" class="form-control" id="placa" name="placa" value="{{ servico.placa }}" required>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="valor_bruto" class="form-label">Valor Bruto (R$)</label>
-            <input type="number" step="0.01" class="form-control" id="valor_bruto" name="valor_bruto" value="{{ servico.valor_bruto }}" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="porcentagem_comissao" class="form-label">Porcentagem da Comissão (%)</label>
-            <input type="number" step="0.01" class="form-control" id="porcentagem_comissao" name="porcentagem_comissao" value="{{ servico.porcentagem_comissao }}" required>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label for="valor_comissao_calculado" class="form-label">Valor da Comissão Calculado (R$)</label>
-          <input type="text" class="form-control" id="valor_comissao_calculado" readonly>
-        </div>
-        <div class="mb-3">
-          <label for="observacao" class="form-label">Observação</label>
-          <textarea class="form-control" id="observacao" name="observacao" rows="3">{{ servico.observacao }}</textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Atualizar Serviço</button>
-        <a href="{{ url_for('servicos') }}" class="btn btn-secondary">Cancelar</a>
-      </form>
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-1 text-primary">
+            <i class="bi bi-tools me-2"></i>Gerenciar Serviços
+        </h1>
+        <p class="text-muted mb-0">Registre e acompanhe todos os serviços realizados</p>
     </div>
-  </div>
+</div>
 
-  <script>
+<!-- Formulário de Cadastro -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-plus-circle me-2"></i>Registrar Novo Serviço
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('servicos') }}" method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="data_servico" class="form-label">
+                        <i class="bi bi-calendar3 me-1"></i>Data do Serviço
+                    </label>
+                    <input type="date" class="form-control" id="data_servico" name="data_servico" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="cliente_id" class="form-label">
+                        <i class="bi bi-person me-1"></i>Cliente
+                    </label>
+                    <select class="form-select" id="cliente_id" name="cliente_id" required>
+                        <option value="">Selecione um cliente</option>
+                        {% for cliente in clientes %}
+                            <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="veiculo" class="form-label">
+                        <i class="bi bi-car-front me-1"></i>Veículo
+                    </label>
+                    <input type="text" class="form-control" id="veiculo" name="veiculo" placeholder="Ex: Civic 2020" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="placa" class="form-label">
+                        <i class="bi bi-credit-card me-1"></i>Placa
+                    </label>
+                    <input type="text" class="form-control" id="placa" name="placa" placeholder="Ex: ABC-1234" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="valor_bruto" class="form-label">
+                        <i class="bi bi-currency-dollar me-1"></i>Valor do Serviço (R$)
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="valor_bruto" name="valor_bruto" placeholder="0,00" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="porcentagem_comissao" class="form-label">
+                        <i class="bi bi-percent me-1"></i>Comissão (%)
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="porcentagem_comissao" name="porcentagem_comissao" placeholder="0,00" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-muted">
+                        <i class="bi bi-calculator me-1"></i>Valor da Comissão
+                    </label>
+                    <input type="text" class="form-control bg-light" id="valor_comissao_calc" readonly placeholder="R$ 0,00">
+                </div>
+                <div class="col-12">
+                    <label for="observacao" class="form-label">
+                        <i class="bi bi-chat-text me-1"></i>Observações
+                    </label>
+                    <textarea class="form-control" id="observacao" name="observacao" rows="3" placeholder="Detalhes do serviço realizado..."></textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-2"></i>Registrar Serviço
+                </button>
+                <button type="reset" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Limpar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Serviços -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <i class="bi bi-list-ul me-2"></i>Serviços Registrados
+        </div>
+        <span class="badge bg-primary">{{ servicos|length }} serviços</span>
+    </div>
+    <div class="card-body p-0">
+        {% if servicos %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-calendar3 me-1"></i>Data</th>
+                            <th><i class="bi bi-person me-1"></i>Cliente</th>
+                            <th><i class="bi bi-car-front me-1"></i>Veículo</th>
+                            <th><i class="bi bi-credit-card me-1"></i>Placa</th>
+                            <th><i class="bi bi-currency-dollar me-1"></i>Valor</th>
+                            <th><i class="bi bi-percent me-1"></i>Comissão</th>
+                            <th><i class="bi bi-check-circle me-1"></i>Status</th>
+                            <th><i class="bi bi-gear me-1"></i>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servico in servicos %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ servico.data_servico.strftime('%d/%m/%Y') }}</div>
+                                    <small class="text-muted">{{ servico.data_servico.strftime('%H:%M') }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                            <i class="bi bi-person text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ servico.cliente.nome }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ servico.veiculo }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ servico.placa }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-success">R$ {{ "{:,.2f}".format(servico.valor_bruto).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ servico.porcentagem_comissao }}%</div>
+                                    <small class="text-muted">R$ {{ "{:,.2f}".format(servico.valor_bruto * (servico.porcentagem_comissao / 100)).replace(',', 'X').replace('.', ',').replace('X', '.') }}</small>
+                                </td>
+                                <td>
+                                    {% set comissao_total = servico.valor_bruto * (servico.porcentagem_comissao / 100) %}
+                                    {% set comissao_restante = comissao_total - servico.comissao_recebida %}
+                                    {% if comissao_restante <= 0.001 %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Pago
+                                        </span>
+                                    {% elif servico.comissao_recebida > 0 %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-clock me-1"></i>Parcial
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle me-1"></i>Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('editar_servico', servico_id=servico.id) }}" class="btn btn-outline-primary btn-sm" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {% if servico.valor_pago == 0 and servico.comissao_recebida == 0 %}
+                                            <form action="{{ url_for('deletar_servico', servico_id=servico.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja deletar este serviço?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Deletar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                </div>
+                <h5 class="text-muted">Nenhum serviço registrado</h5>
+                <p class="text-muted">Comece registrando seu primeiro serviço usando o formulário acima.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Calcular valor da comissão automaticamente
     document.addEventListener('DOMContentLoaded', function() {
-      const valorBrutoInput = document.getElementById('valor_bruto');
-      const porcentagemComissaoInput = document.getElementById('porcentagem_comissao');
-      const valorComissaoCalculadoInput = document.getElementById('valor_comissao_calculado');
-
-      function calcularComissao() {
-        const valorBruto = parseFloat(valorBrutoInput.value) || 0;
-        const porcentagemComissao = parseFloat(porcentagemComissaoInput.value) || 0;
-        const comissao = (valorBruto * porcentagemComissao) / 100;
-        valorComissaoCalculadoInput.value = comissao.toFixed(2);
-      }
-
-      valorBrutoInput.addEventListener('input', calcularComissao);
-      porcentagemComissaoInput.addEventListener('input', calcularComissao);
-
-      // Calcula a comissão inicial caso já haja valores
-      calcularComissao();
+        const valorBruto = document.getElementById('valor_bruto');
+        const porcentagemComissao = document.getElementById('porcentagem_comissao');
+        const valorComissaoCalc = document.getElementById('valor_comissao_calc');
+        
+        function calcularComissao() {
+            const valor = parseFloat(valorBruto.value) || 0;
+            const porcentagem = parseFloat(porcentagemComissao.value) || 0;
+            const comissao = valor * (porcentagem / 100);
+            
+            valorComissaoCalc.value = 'R$ ' + comissao.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        valorBruto.addEventListener('input', calcularComissao);
+        porcentagemComissao.addEventListener('input', calcularComissao);
+        
+        // Definir data atual como padrão
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('data_servico').value = hoje;
     });
-  </script>
+</script>
 {% endblock %}

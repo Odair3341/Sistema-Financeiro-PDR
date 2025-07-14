@@ -1,75 +1,215 @@
-
 {% extends 'base.html' %}
 
+{% block title %}{{ cliente.nome }} - Detalhes do Cliente{% endblock %}
+
 {% block content %}
-  <h1 class="mb-4">Detalhes do Cliente: {{ cliente.nome }}</h1>
-
-  <!-- Formulário para Registrar Pagamento -->
-  <div class="card mb-4">
-    <div class="card-header">
-      Registrar Novo Pagamento
-    </div>
-    <div class="card-body">
-      <form action="{{ url_for('registrar_pagamento', cliente_id=cliente.id) }}" method="POST">
-        <div class="row">
-          <div class="col-md-4">
-            <label for="valor" class="form-label">Valor do Pagamento (R$)</label>
-            <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
-          </div>
-          <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-success">Registrar Pagamento</button>
-          </div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-1 text-primary">
+                    <i class="bi bi-person-circle me-2"></i>{{ cliente.nome }}
+                </h1>
+                <p class="text-muted mb-0">Detalhes e histórico do cliente</p>
+            </div>
+            <a href="{{ url_for('clientes') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
         </div>
-      </form>
     </div>
-  </div>
+</div>
 
-  <!-- Lista de Serviços do Cliente -->
-  <div class="card">
+<!-- Resumo do Cliente -->
+<div class="row g-4 mb-4">
+    {% set total_servicos = servicos|sum(attribute='valor_bruto') %}
+    {% set total_pago = servicos|sum(attribute='valor_pago') %}
+    {% set saldo_devedor = total_servicos - total_pago %}
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-tools fs-1 text-primary"></i>
+                </div>
+                <h4 class="fw-bold text-primary">{{ servicos|length }}</h4>
+                <p class="text-muted mb-0">Total de Serviços</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-currency-dollar fs-1 text-info"></i>
+                </div>
+                <h4 class="fw-bold text-info">R$ {{ "{:,.2f}".format(total_servicos).replace(',', 'X').replace('.', ',').replace('X', '.') }}</h4>
+                <p class="text-muted mb-0">Valor Total</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                </div>
+                <h4 class="fw-bold text-success">R$ {{ "{:,.2f}".format(total_pago).replace(',', 'X').replace('.', ',').replace('X', '.') }}</h4>
+                <p class="text-muted mb-0">Valor Pago</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="bg-{% if saldo_devedor > 0 %}warning{% else %}success{% endif %} bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-{% if saldo_devedor > 0 %}exclamation-triangle{% else %}check-all{% endif %} fs-1 text-{% if saldo_devedor > 0 %}warning{% else %}success{% endif %}"></i>
+                </div>
+                <h4 class="fw-bold text-{% if saldo_devedor > 0 %}warning{% else %}success{% endif %}">R$ {{ "{:,.2f}".format(saldo_devedor).replace(',', 'X').replace('.', ',').replace('X', '.') }}</h4>
+                <p class="text-muted mb-0">Saldo Devedor</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registrar Pagamento -->
+{% if saldo_devedor > 0 %}
+<div class="card mb-4">
     <div class="card-header">
-      Histórico de Serviços
+        <i class="bi bi-cash-coin me-2"></i>Registrar Novo Pagamento
     </div>
     <div class="card-body">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Veículo</th>
-            <th>Valor Bruto</th>
-            <th>Valor Pago</th>
-            <th>Saldo Devedor</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for servico in servicos %}
-            <tr>
-              <td>{{ servico.data_servico.strftime('%d/%m/%Y') }}</td>
-              <td>{{ servico.veiculo }}</td>
-              <td>R$ {{ "%.2f"|format(servico.valor_bruto) }}</td>
-              <td>R$ {{ "%.2f"|format(servico.valor_pago) }}</td>
-              <td>R$ {{ "%.2f"|format(servico.valor_bruto - servico.valor_pago) }}</td>
-              <td>
-                {% if servico.quitado %}
-                  <span class="badge bg-success">Liquidado</span>
-                {% elif servico.valor_pago > 0 %}
-                  <span class="badge bg-info">Parcialmente Pago</span>
-                {% else %}
-                  <span class="badge bg-warning">Em Aberto</span>
-                {% endif %}
-              </td>
-            </tr>
-          {% else %}
-            <tr>
-              <td colspan="6" class="text-center">Nenhum serviço para este cliente.</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+        <form action="{{ url_for('registrar_pagamento', cliente_id=cliente.id) }}" method="POST">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label for="valor" class="form-label">
+                        <i class="bi bi-currency-dollar me-1"></i>Valor do Pagamento (R$)
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="valor" name="valor" max="{{ saldo_devedor }}" placeholder="0,00" required>
+                    <div class="form-text">Máximo: R$ {{ "{:,.2f}".format(saldo_devedor).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle me-2"></i>Registrar Pagamento
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-  </div>
+</div>
+{% endif %}
 
-  <div class="mt-4">
-    <a href="{{ url_for('clientes') }}" class="btn btn-secondary">Voltar para a Lista de Clientes</a>
-  </div>
+<!-- Histórico de Serviços -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <i class="bi bi-clock-history me-2"></i>Histórico de Serviços
+        </div>
+        <span class="badge bg-primary">{{ servicos|length }} serviços</span>
+    </div>
+    <div class="card-body p-0">
+        {% if servicos %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-calendar3 me-1"></i>Data</th>
+                            <th><i class="bi bi-car-front me-1"></i>Veículo</th>
+                            <th><i class="bi bi-credit-card me-1"></i>Placa</th>
+                            <th><i class="bi bi-currency-dollar me-1"></i>Valor Bruto</th>
+                            <th><i class="bi bi-check-circle me-1"></i>Valor Pago</th>
+                            <th><i class="bi bi-exclamation-triangle me-1"></i>Saldo</th>
+                            <th><i class="bi bi-flag me-1"></i>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servico in servicos %}
+                            {% set saldo_servico = servico.valor_bruto - servico.valor_pago %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ servico.data_servico.strftime('%d/%m/%Y') }}</div>
+                                    <small class="text-muted">{{ servico.data_servico.strftime('%H:%M') }}</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ servico.veiculo }}</div>
+                                    {% if servico.observacao %}
+                                        <small class="text-muted">{{ servico.observacao[:50] }}{% if servico.observacao|length > 50 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ servico.placa }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-info">R$ {{ "{:,.2f}".format(servico.valor_bruto).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-success">R$ {{ "{:,.2f}".format(servico.valor_pago).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold {% if saldo_servico > 0 %}text-warning{% else %}text-success{% endif %}">
+                                        R$ {{ "{:,.2f}".format(saldo_servico).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if servico.quitado or saldo_servico <= 0 %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Liquidado
+                                        </span>
+                                    {% elif servico.valor_pago > 0 %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-clock me-1"></i>Parcial
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle me-1"></i>Em Aberto
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">TOTAIS:</td>
+                            <td class="fw-bold text-info">R$ {{ "{:,.2f}".format(total_servicos).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                            <td class="fw-bold text-success">R$ {{ "{:,.2f}".format(total_pago).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                            <td class="fw-bold {% if saldo_devedor > 0 %}text-warning{% else %}text-success{% endif %}">R$ {{ "{:,.2f}".format(saldo_devedor).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                </div>
+                <h5 class="text-muted">Nenhum serviço para este cliente</h5>
+                <p class="text-muted">Os serviços realizados para {{ cliente.nome }} aparecerão aqui.</p>
+                <a href="{{ url_for('servicos') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Registrar Primeiro Serviço
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Definir valor máximo no campo de pagamento
+    document.addEventListener('DOMContentLoaded', function() {
+        const valorInput = document.getElementById('valor');
+        if (valorInput) {
+            valorInput.addEventListener('input', function() {
+                const max = parseFloat(this.max);
+                const value = parseFloat(this.value);
+                
+                if (value > max) {
+                    this.value = max.toFixed(2);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

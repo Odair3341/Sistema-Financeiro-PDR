@@ -1,0 +1,138 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Gerenciar Serviços</h1>
+
+  <!-- Formulário de Cadastro de Serviço -->
+  <div class="card mb-4">
+    <div class="card-header">
+      Adicionar Novo Serviço
+    </div>
+    <div class="card-body">
+      <form action="{{ url_for('servicos') }}" method="POST">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="data_servico" class="form-label">Data do Serviço</label>
+            <input type="date" class="form-control" id="data_servico" name="data_servico" required>
+          </div>
+          <div class="col-md-8 mb-3">
+            <label for="cliente_id" class="form-label">Cliente</label>
+            <select class="form-select" id="cliente_id" name="cliente_id" required>
+              <option value="" disabled selected>Selecione um cliente</option>
+              {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="veiculo" class="form-label">Veículo</label>
+            <input type="text" class="form-control" id="veiculo" name="veiculo" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="placa" class="form-label">Placa</label>
+            <input type="text" class="form-control" id="placa" name="placa" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="valor_bruto" class="form-label">Valor Bruto (R$)</label>
+            <input type="number" step="0.01" class="form-control" id="valor_bruto" name="valor_bruto" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="porcentagem_comissao" class="form-label">Porcentagem da Comissão (%)</label>
+            <input type="number" step="0.01" class="form-control" id="porcentagem_comissao" name="porcentagem_comissao" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="valor_comissao_calculado" class="form-label">Valor da Comissão Calculado (R$)</label>
+          <input type="text" class="form-control" id="valor_comissao_calculado" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="observacao" class="form-label">Observação</label>
+          <textarea class="form-control" id="observacao" name="observacao" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Adicionar Serviço</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const valorBrutoInput = document.getElementById('valor_bruto');
+      const porcentagemComissaoInput = document.getElementById('porcentagem_comissao');
+      const valorComissaoCalculadoInput = document.getElementById('valor_comissao_calculado');
+
+      function calcularComissao() {
+        const valorBruto = parseFloat(valorBrutoInput.value) || 0;
+        const porcentagemComissao = parseFloat(porcentagemComissaoInput.value) || 0;
+        const comissao = (valorBruto * porcentagemComissao) / 100;
+        valorComissaoCalculadoInput.value = comissao.toFixed(2);
+      }
+
+      valorBrutoInput.addEventListener('input', calcularComissao);
+      porcentagemComissaoInput.addEventListener('input', calcularComissao);
+
+      // Calcula a comissão inicial caso já haja valores
+      calcularComissao();
+    });
+  </script>
+
+  <!-- Lista de Serviços -->
+  <div class="card">
+    <div class="card-header">
+      Serviços Cadastrados
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Veículo</th>
+            <th>Placa</th>
+            <th>Valor Bruto</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for servico in servicos %}
+            {% set comissao_servico = servico.valor_bruto * (servico.porcentagem_comissao / 100) %}
+            <tr>
+              <td>{{ servico.data_servico.strftime('%d/%m/%Y') }}</td>
+              <td>{{ servico.cliente.nome }}</td>
+              <td>{{ servico.veiculo }}</td>
+              <td>{{ servico.placa }}</td>
+              <td>R$ {{ "%.2f"|format(servico.valor_bruto) }}</td>
+              <td>
+                {% if servico.quitado %}
+                  <span class="badge bg-success">Liquidado</span>
+                {% elif servico.valor_pago > 0 %}
+                  <span class="badge bg-info">Parcialmente Pago</span>
+                {% else %}
+                  <span class="badge bg-warning">Em Aberto</span>
+                {% endif %}
+              </td>
+              <td>R$ {{ "%.2f"|format(comissao_servico) }}</td>
+              <td>
+                <a href="{{ url_for('editar_servico', servico_id=servico.id) }}" class="btn btn-warning btn-sm">Editar</a>
+                                <form action="{{ url_for('deletar_servico', servico_id=servico.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja deletar este serviço?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="8" class="text-center">Nenhum serviço cadastrado ainda.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+

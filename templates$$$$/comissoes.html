@@ -1,0 +1,87 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Comissões a Receber</h1>
+
+  <div class="card">
+    <div class="card-header">
+      Detalhes das Comissões por Serviço
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Serviço</th>
+            <th>Valor Bruto</th>
+            <th>Porcentagem</th>
+            <th>Valor da Comissão</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set total_comissao = namespace(valor=0) %}
+          {% for servico in servicos %}
+            {% set comissao_servico = servico.valor_bruto * (servico.porcentagem_comissao / 100) %}
+            {% set total_comissao.valor = total_comissao.valor + comissao_servico %}
+            <tr>
+              <td>{{ servico.data_servico.strftime('%d/%m/%Y') }}</td>
+              <td>{{ servico.cliente.nome }}</td>
+              <td>{{ servico.veiculo }} - {{ servico.placa }}</td>
+              <td>R$ {{ "%.2f"|format(servico.valor_bruto) }}</td>
+              <td>{{ servico.porcentagem_comissao }}%</td>
+              <td>R$ {{ "%.2f"|format(comissao_servico) }}</td>
+              <td>
+                {% set comissao_restante = comissao_servico - servico.comissao_recebida %}
+                {% if comissao_restante <= 0.001 %}
+                  <span class="badge bg-success">Recebida Integralmente</span>
+                {% elif servico.comissao_recebida > 0 %}
+                  <span class="badge bg-info">Recebida Parcialmente</span>
+                {% else %}
+                  <span class="badge bg-warning">Pendente</span>
+                {% endif %}
+                <br>
+                <small>Recebido: R$ {{ "%.2f"|format(servico.comissao_recebida) }}</small>
+                <br>
+                <small>Restante: R$ {{ "%.2f"|format(comissao_restante) }}</small>
+              </td>
+              <td>
+                {% if comissao_restante > 0 %}
+                  {% if comissao_restante > 0 %}
+                                <form action="{{ url_for('receber_comissao', servico_id=servico.id) }}" method="POST" class="d-inline-flex">
+                                    <input type="number" step="0.01" name="valor_receber" class="form-control form-control-sm me-2" placeholder="Valor" required>
+                                    <button type="submit" class="btn btn-success btn-sm">Receber</button>
+                                </form>
+                            {% endif %}
+                            {% if servico.comissao_recebida > 0 %}
+                                <form action="{{ url_for('resetar_comissao', servico_id=servico.id) }}" method="POST" class="d-inline ms-1" onsubmit="return confirm('Isso irá zerar o valor da comissão recebida para este serviço. Tem certeza?');">
+                                    <button type="submit" class="btn btn-secondary btn-sm">Resetar</button>
+                                </form>
+                            {% endif %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="8" class="text-center">Nenhum serviço cadastrado para calcular comissões.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="table-dark">
+            <td colspan="5" class="text-end"><strong>Total Geral das Comissões:</strong></td>
+            <td><strong>R$ {{ "%.2f"|format(total_comissao.valor) }}</strong></td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+

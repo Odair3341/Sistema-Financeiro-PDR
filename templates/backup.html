@@ -1,41 +1,282 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Backup do Sistema - Oliveira Martelinho de Ouro{% endblock %}
 
 {% block content %}
-  <h1 class="mb-4">Backup e Restauração</h1>
-
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card mb-4">
-        <div class="card-header">
-          Exportar Dados
-        </div>
-        <div class="card-body">
-          <p class="card-text">Exporte todos os seus dados (clientes, serviços, despesas, pagamentos) para um arquivo JSON.</p>
-          <a href="{{ url_for('export_data') }}" class="btn btn-primary">
-            <i class="fas fa-download"></i> Exportar Backup (JSON)
-          </a>
-        </div>
-      </div>
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-1 text-primary">
+            <i class="bi bi-cloud-download me-2"></i>Backup e Restauração
+        </h1>
+        <p class="text-muted mb-0">Proteja seus dados com backups regulares</p>
     </div>
+</div>
 
-    <div class="col-md-6">
-      <div class="card mb-4">
-        <div class="card-header">
-          Importar Dados
+<!-- Alerta de Segurança -->
+<div class="alert alert-warning mb-4">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-shield-exclamation fs-4 me-3"></i>
+        <div>
+            <h6 class="mb-1">⚠️ Importante - Segurança dos Dados</h6>
+            <p class="mb-0">
+                Faça backups regulares dos seus dados. A restauração irá <strong>substituir todos os dados atuais</strong> pelos dados do arquivo de backup.
+            </p>
         </div>
-        <div class="card-body">
-          <p class="card-text">Importe dados de um arquivo JSON de backup. <strong>Atenção: Isso apagará todos os dados existentes antes de importar os novos.</strong></p>
-          <form action="{{ url_for('import_data') }}" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Tem certeza que deseja importar? Todos os dados atuais serão apagados e substituídos pelos dados do arquivo.');">
-            <div class="mb-3">
-              <label for="backupFile" class="form-label">Selecione o arquivo JSON:</label>
-              <input class="form-control" type="file" id="backupFile" name="backup_file" accept=".json" required>
+    </div>
+</div>
+
+<!-- Cards de Ação -->
+<div class="row g-4 mb-5">
+    <!-- Card para Exportar -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="bg-success bg-opacity-10 rounded-circle p-4 d-inline-flex mb-4">
+                    <i class="bi bi-download display-4 text-success"></i>
+                </div>
+                <h4 class="fw-bold text-success mb-3">Exportar Dados</h4>
+                <p class="text-muted mb-4">
+                    Crie um arquivo de backup (.json) com todos os dados atuais do sistema incluindo clientes, serviços, despesas e pagamentos.
+                </p>
+                
+                <div class="mb-4">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h6 class="text-muted mb-1">Formato</h6>
+                                <span class="badge bg-info">JSON</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted mb-1">Tamanho</h6>
+                            <span class="text-success fw-bold">Compacto</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('export_data') }}" class="btn btn-success btn-lg w-100">
+                    <i class="bi bi-cloud-download me-2"></i>Fazer Backup Agora
+                </a>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        O download iniciará automaticamente
+                    </small>
+                </div>
             </div>
-            <button type="submit" class="btn btn-danger">
-              <i class="fas fa-upload"></i> Importar Backup
-            </button>
-          </form>
         </div>
-      </div>
     </div>
-  </div>
+
+    <!-- Card para Importar -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="bg-warning bg-opacity-10 rounded-circle p-4 d-inline-flex mb-4">
+                    <i class="bi bi-upload display-4 text-warning"></i>
+                </div>
+                <h4 class="fw-bold text-warning mb-3">Importar Dados</h4>
+                <p class="text-muted mb-4">
+                    Restaure os dados a partir de um arquivo de backup. Esta ação irá substituir completamente todos os dados atuais do sistema.
+                </p>
+                
+                <div class="alert alert-danger mb-4">
+                    <small>
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        <strong>Atenção:</strong> Esta ação não pode ser desfeita!
+                    </small>
+                </div>
+                
+                <form action="{{ url_for('import_data') }}" method="POST" enctype="multipart/form-data" onsubmit="return confirmarImportacao()">
+                    <div class="mb-3">
+                        <label for="backup_file" class="form-label">
+                            <i class="bi bi-file-earmark-arrow-up me-1"></i>Selecionar Arquivo de Backup
+                        </label>
+                        <input type="file" class="form-control" name="backup_file" id="backup_file" accept=".json" required>
+                        <div class="form-text">Apenas arquivos .json são aceitos</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning btn-lg w-100">
+                        <i class="bi bi-upload me-2"></i>Restaurar Backup
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações do Sistema -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-info-circle me-2"></i>Informações do Sistema
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-database fs-1 text-primary"></i>
+                </div>
+                <h6 class="text-muted mb-1">BANCO DE DADOS</h6>
+                <div class="fw-bold text-primary">SQLite</div>
+                <small class="text-muted">Local e seguro</small>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-shield-check fs-1 text-success"></i>
+                </div>
+                <h6 class="text-muted mb-1">SEGURANÇA</h6>
+                <div class="fw-bold text-success">Ativa</div>
+                <small class="text-muted">Dados protegidos</small>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-clock-history fs-1 text-info"></i>
+                </div>
+                <h6 class="text-muted mb-1">ÚLTIMO BACKUP</h6>
+                <div class="fw-bold text-info">{{ ultimo_backup or 'Nunca' }}</div>
+                <small class="text-muted">Recomendado: Semanal</small>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                    <i class="bi bi-hdd fs-1 text-warning"></i>
+                </div>
+                <h6 class="text-muted mb-1">TAMANHO DOS DADOS</h6>
+                <div class="fw-bold text-warning">{{ tamanho_dados or 'Calculando...' }}</div>
+                <small class="text-muted">Espaço utilizado</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dicas de Backup -->
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-lightbulb me-2"></i>Dicas de Backup
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="text-success">
+                    <i class="bi bi-check-circle me-2"></i>Boas Práticas
+                </h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-success me-2"></i>
+                        Faça backup semanalmente
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-success me-2"></i>
+                        Guarde em local seguro (nuvem)
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-success me-2"></i>
+                        Teste a restauração periodicamente
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-success me-2"></i>
+                        Mantenha múltiplas versões
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-danger">
+                    <i class="bi bi-x-circle me-2"></i>Evite
+                </h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-danger me-2"></i>
+                        Nunca fazer backup
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-danger me-2"></i>
+                        Guardar apenas no computador
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-danger me-2"></i>
+                        Restaurar sem confirmar
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-arrow-right text-danger me-2"></i>
+                        Usar arquivos corrompidos
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmarImportacao() {
+        const arquivo = document.getElementById('backup_file').files[0];
+        
+        if (!arquivo) {
+            alert('Por favor, selecione um arquivo de backup.');
+            return false;
+        }
+        
+        if (!arquivo.name.endsWith('.json')) {
+            alert('Por favor, selecione apenas arquivos .json.');
+            return false;
+        }
+        
+        const confirmacao = confirm(
+            '⚠️ ATENÇÃO!\n\n' +
+            'Esta ação irá APAGAR TODOS os dados atuais do sistema e substituí-los pelos dados do arquivo de backup.\n\n' +
+            'Esta operação NÃO PODE SER DESFEITA!\n\n' +
+            'Tem certeza que deseja continuar?'
+        );
+        
+        if (confirmacao) {
+            const confirmacaoFinal = confirm(
+                'Última confirmação:\n\n' +
+                'Você tem certeza ABSOLUTA que deseja restaurar o backup?\n\n' +
+                'Todos os dados atuais serão perdidos permanentemente!'
+            );
+            
+            return confirmacaoFinal;
+        }
+        
+        return false;
+    }
+    
+    // Mostrar nome do arquivo selecionado
+    document.getElementById('backup_file').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        if (fileName) {
+            const label = document.querySelector('label[for="backup_file"]');
+            label.innerHTML = `<i class="bi bi-file-earmark-check me-1"></i>Arquivo: ${fileName}`;
+        }
+    });
+    
+    // Animação para os cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
+        });
+    });
+</script>
+
+<style>
+    .border-end {
+        border-right: 1px solid #e2e8f0 !important;
+    }
+    
+    @media (max-width: 768px) {
+        .border-end {
+            border-right: none !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        transition: all 0.3s ease;
+    }
+</style>
 {% endblock %}
