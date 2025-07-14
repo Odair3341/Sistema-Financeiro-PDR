@@ -17,7 +17,8 @@
     {% set total_despesas = despesas|sum(attribute='valor') %}
     {% set despesas_pagas = despesas|selectattr('pago', 'equalto', true)|sum(attribute='valor') %}
     {% set despesas_pendentes = total_despesas - despesas_pagas %}
-    {% set despesas_vencidas = despesas|selectattr('pago', 'equalto', false)|selectattr('data_vencimento', 'lt', moment().date())|list %}
+    {% set hoje = moment().date() if moment else none %}
+    {% set despesas_vencidas = despesas|selectattr('pago', 'equalto', false)|list if hoje else [] %}
     
     <div class="col-lg-3 col-md-6">
         <div class="card text-center">
@@ -130,7 +131,6 @@
                     </thead>
                     <tbody>
                         {% for despesa in despesas %}
-                            {% set hoje = moment().date() if moment else none %}
                             {% set vencida = despesa.data_vencimento.date() < hoje if hoje and not despesa.pago else false %}
                             {% set vence_hoje = despesa.data_vencimento.date() == hoje if hoje and not despesa.pago else false %}
                             
